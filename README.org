@@ -1,0 +1,13 @@
+# Directus Template CLI
+
+A CLI tool for Directus templates
+
+This fork is mainly dedicated to CMS
+
+#+begin_src 
+$ npx directus-template-cli apply
+#+end_src
+
+## License
+
+This template is licensed under the [MIT License](https://opensource.org/licenses/MIT).
