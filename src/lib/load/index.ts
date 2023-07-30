@@ -27,8 +27,13 @@ export default async function apply(dir: string, cli: any) {
   cli.log('Loaded Dashboards')
   await loadToDestination('panels', readFile('panels', source)) // Comes after dashboards
   cli.log('Loaded Panels')
-  await loadFiles(readFile('files', source), source) // Comes after folders
-  cli.log('Loaded Files')
+    try{
+	await loadFiles(readFile('files', source), source) // Comes after folders
+	cli.log('Loaded Files')
+    } catch(error) {
+	console.log("File loading failed: ", error.message)
+    }
+	
   await loadUsers(readFile('users', source)) // Comes after roles, files
   cli.log('Loaded Users')
   await loadFlows(readFile('flows', source))
