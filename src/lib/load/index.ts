@@ -10,6 +10,7 @@ import loadOperations from './load-operations'
 import loadData from './load-data'
 import loadPresets from './load-presets'
 import loadSettings from './load-settings'
+import loadTranslations from './load-translations'
 import loadPublicPermissions from './load-public-permissions'
 
 export default async function apply(dir: string, cli: any) {
@@ -46,6 +47,8 @@ export default async function apply(dir: string, cli: any) {
   cli.log('Loaded Presets')
   await loadSettings(readFile('settings', source))
   cli.log('Loaded Settings')
+  await loadTranslations(readFile('translations', source))
+  cli.log('Loaded translations')
   await loadPublicPermissions(readFile('public-permissions', source))
   cli.log('Loaded Public Permissions')
   return {}
