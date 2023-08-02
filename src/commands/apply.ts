@@ -29,6 +29,10 @@ async function getTemplate() {
   return template
 }
 
+async function executeTestPrompt() {
+    return await ux.prompt('This is test prompt.');
+}
+
 async function getDirectusUrl() {
   const directusUrl = await ux.prompt('What is your Directus URL?')
   // Validate URL
@@ -71,6 +75,8 @@ export default class ApplyCommand extends Command {
     const chosenTemplate = await getTemplate()
     this.log(`You selected ${chosenTemplate.template.templateName}`)
     this.log(separator)
+
+    const test = await executeTestPrompt();
 
     const directusUrl = await getDirectusUrl()
     api.setBaseUrl(directusUrl)
