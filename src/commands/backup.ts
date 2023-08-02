@@ -10,8 +10,8 @@ import backup from '../lib/backup'
 
 const separator = '------------------'
 
-async function executeTestPrompt() {
-    return await ux.prompt('This is test prompt.');
+ async function backupFolder() {
+     return await ux.prompt('Give a backup folder name');
 }
 
 async function getDirectusUrl() {
@@ -53,7 +53,7 @@ export default class ApplyCommand extends Command {
   public async run(): Promise<void> {
    // const {flags} = await this.parse(ApplyCommand)
 
-    const test = await executeTestPrompt();
+    const folder = await backupFolder();
 
     const directusUrl = await getDirectusUrl()
     api.setBaseUrl(directusUrl)
@@ -75,12 +75,12 @@ export default class ApplyCommand extends Command {
     }
 
     // Run load script
-    ux.action.start(`Applying backup - ${test}`)
-    await backup(directusUrl, this)
+    ux.action.start(`Applying backup - from ${directusUrl} to ${folder}`)
+    await backup(folder, this)
     ux.action.stop()
 
     this.log(separator)
-    this.log('Template applied successfully.')
+    this.log('Backup operation applied successfully.')
     this.exit
   }
 }
