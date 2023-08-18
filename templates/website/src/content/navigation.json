@@ -1,1 +1,37 @@
-[]
+[
+    {
+        "logo": "c671a364-49eb-4cab-add8-cee066b6ce57",
+        "user_updated": null,
+        "user_created": "2803d7ac-a679-4e26-896b-c4d6f5b9a312",
+        "date_updated": null,
+        "date_created": "2023-08-10T10:19:18.374Z",
+        "id": "footer",
+        "status": "published",
+        "items": [
+            "5901224b-70f9-4dea-b794-a1309ba02425"
+        ],
+        "translations": [
+            3,
+            4
+        ]
+    },
+    {
+        "logo": "c671a364-49eb-4cab-add8-cee066b6ce57",
+        "user_updated": "2803d7ac-a679-4e26-896b-c4d6f5b9a312",
+        "user_created": "2803d7ac-a679-4e26-896b-c4d6f5b9a312",
+        "date_updated": "2023-08-09T10:02:19.796Z",
+        "date_created": "2023-08-07T09:29:10.950Z",
+        "id": "main",
+        "status": "published",
+        "items": [
+            "5636a5be-2720-4df6-b7b8-215df144e755",
+            "b780e454-5066-431c-ba7b-e0f967f25612",
+            "c4ee867a-5224-4bd0-8c71-1516d9200907",
+            "00949c4c-7e15-43ab-86c2-a87db550daf2"
+        ],
+        "translations": [
+            1,
+            2
+        ]
+    }
+]

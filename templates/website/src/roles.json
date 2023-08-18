@@ -1,39 +1,39 @@
 [
-  {
-      "id": "00e3e00d-4fc5-4d01-8bf4-858ba513fc5a",
-      "name": "Content Manager",
-      "icon": "manage_accounts",
-      "description": null,
-      "ip_access": null,
-      "enforce_tfa": false,
-      "admin_access": false,
-      "app_access": true,
-      "users": [
-        "bd479b21-20c9-4c60-8178-0738c38c5a68"
-      ]
+    {
+        "id": "00e3e00d-4fc5-4d01-8bf4-858ba513fc5a",
+        "icon": "manage_accounts",
+        "name": "Content Manager",
+        "description": null,
+        "ip_access": null,
+        "enforce_tfa": false,
+        "admin_access": false,
+        "app_access": true,
+        "users": []
     },
     {
-      "id": "9ecc2969-8b38-4088-9dc1-78334a206445",
-      "name": "Website API",
-      "icon": "android",
-      "description": null,
-      "ip_access": null,
-      "enforce_tfa": false,
-      "admin_access": false,
-      "app_access": false,
-      "users": []
+        "id": "9ecc2969-8b38-4088-9dc1-78334a206445",
+        "icon": "android",
+        "name": "Website API",
+        "description": null,
+        "ip_access": null,
+        "enforce_tfa": false,
+        "admin_access": false,
+        "app_access": false,
+        "users": [
+            "ef3d1f21-30af-4a4e-adef-cc9f7d4eb340"
+        ]
     },
     {
-      "id": "f6c2413d-c06c-43aa-a7fb-2eaa40217368",
-      "name": "Administrator",
-      "icon": "verified",
-      "description": "$t:admin_description",
-      "ip_access": null,
-      "enforce_tfa": false,
-      "admin_access": true,
-      "app_access": true,
-      "users": [
-        "00535eb1-6651-4f4c-ba7b-b8677a4791a5"
-      ]
-  }
+        "id": "e28c2ce9-25ce-4aa3-bc65-15cab1d6bf48",
+        "icon": "verified",
+        "name": "Administrator",
+        "description": "$t:admin_description",
+        "ip_access": null,
+        "enforce_tfa": false,
+        "admin_access": true,
+        "app_access": true,
+        "users": [
+            "2803d7ac-a679-4e26-896b-c4d6f5b9a312"
+        ]
+    }
 ]
