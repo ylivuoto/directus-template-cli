@@ -41,7 +41,7 @@ async function getDirectusToken(directusUrl: string) {
   }
 }
 
-export default class ApplyCommand extends Command {
+export default class BackupCommand extends Command {
   static description = 'Apply a backup operation for existing directus API.'
 
   static examples = [
@@ -71,7 +71,7 @@ export default class ApplyCommand extends Command {
     })
 
     if (collections.length < 0) {
-	ux.error('Directus instance is empty, and hence the backup operation is not possible.')
+	ux.error('Directus instance is empty, and hence the backup operation is not necessary.')
     }
 
     // Run load script
