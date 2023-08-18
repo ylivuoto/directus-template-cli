@@ -69,7 +69,7 @@ async function content(dir: string, cli: any) {
 }
 
 async function general(dir: string, cli: any) {
-    const collections = ['operations', 'panels', 'presets', 'permissions', 'roles', 'settings', 'translations', 'users']
+    const collections = ['operations', 'panels', 'presets', 'permissions', 'roles', 'settings', 'translations', 'users', 'flows']
     const generalPath = dir
     
     for (let collection of collections) {
