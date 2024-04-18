@@ -33,26 +33,16 @@ export default async function apply(dir: string) {
   // If adding schema instead of overwriting
   await loadCollections(source)
   await loadRelations(source)
-
   await loadRoles(source)
-
   await loadFolders(source)
   await loadFiles(source)
-
   await loadUsers(source)
-
   await loadDashboards(source)
-
   await loadData(source)
-
   await loadFlows(source)
-
   await loadPresets(source)
-
   await loadTranslations(source)
-
   await loadSettings(source)
-
   await loadPermissions(source)
 
   return {}
