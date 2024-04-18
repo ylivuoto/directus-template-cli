@@ -1,12 +1,29 @@
-import {api} from '../api'
+import {createFolders, updateFolder} from '@directus/sdk'
+import {ux} from '@oclif/core'
+
+import {api} from '../sdk'
+import logError from '../utils/log-error'
 import readFile from '../utils/read-file'
 
 export default async function loadFolders(dir: string) {
+  const folders = readFile('folders', dir)
+  ux.action.start(`Loading ${folders.length} folders`)
+
   try {
-    const folders = await readFile('folders', dir)
-    const {data}:{data} = await api.post('/folders', folders)
-    console.log('Folder creation', data)
+    const folderSkeleton = folders.map(folder => ({id: folder.id, name: folder.name}))
+
+    // Create the folders
+    await api.client.request(createFolders(folderSkeleton))
+
+    // Update the folders with relationships concurrently
+    await Promise.all(folders.map(async folder => {
+      const {id, ...rest} = folder
+      await api.client.request(updateFolder(id, rest))
+    }))
   } catch (error) {
-    console.log('Error loading Folders', error.response.data.errors)
+    logError(error)
   }
+
+  ux.action.stop()
+  ux.log('Loaded folders')
 }

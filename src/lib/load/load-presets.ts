@@ -1,15 +1,24 @@
-import {api} from '../api'
+import {createPresets} from '@directus/sdk'
+import {ux} from '@oclif/core'
 
-export default async (presets: any[]) => {
+import {api} from '../sdk'
+import logError from '../utils/log-error'
+import readFile from '../utils/read-file'
+
+export default async function loadPresets(dir: string) {
+  const presets = readFile('presets', dir)
+  ux.action.start(`Loading ${presets.length} presets`)
+
   const cleanPresets = presets.map(preset => {
     preset.user = null
     return preset
   })
-  for (const preset of cleanPresets) {
-    try {
-      await api.post('presets', preset)
-    } catch (error) {
-      console.log('Error uploading preset', error.response.data.errors)
-    }
+  try {
+    await api.client.request(createPresets(cleanPresets))
+  } catch (error) {
+    logError(error)
   }
+
+  ux.action.stop()
+  ux.log('Loaded presets')
 }

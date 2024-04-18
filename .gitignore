@@ -8,8 +8,7 @@
 node_modules
 oclif.manifest.json
 .DS_Store
+/downloads
+/**/downloads
 *~
 #*
-/backups
-/templates/website/src/**
-/templates/website/src/**/*

@@ -1,109 +1,167 @@
-import {Command, Flags} from '@oclif/core'
-import {ux} from '@oclif/core'
+import {Command, ux} from '@oclif/core'
+import {downloadTemplate} from 'giget'
 import * as inquirer from 'inquirer'
-import readTemplates from '../lib/utils/read-templates'
-import validateUrl from '../lib/utils/validate-url'
-import {cwd} from 'node:process'
-import fs from 'node:fs'
 import path from 'node:path'
 
-import {api} from '../lib/api'
 import apply from '../lib/load/'
+import {getDirectusToken, getDirectusUrl} from '../lib/utils/auth'
+import logError from '../lib/utils/log-error'
+import openUrl from '../lib/utils/open-url'
+import resolvePathAndCheckExistence from '../lib/utils/path'
+import {readAllTemplates, readTemplate} from '../lib/utils/read-templates'
+import {transformGitHubUrl} from '../lib/utils/transform-github-url'
 
 const separator = '------------------'
 
 async function getTemplate() {
-  const TEMPLATE_DIR = path.join(__dirname, '..', '..', 'templates')
-  const templates = await readTemplates(TEMPLATE_DIR)
-  const templateChoices = templates.map((template: any) => {
-    return {name: template.templateName, value: template}
-  })
+  const templateType: any = await inquirer.prompt([
+    {
+      choices: [
+        {
+          name: 'Community templates',
+          value: 'community',
+        },
+        {
+          name: 'From a local directory',
+          value: 'local',
+        },
+        {
+          name: 'From a public GitHub repository',
+          value: 'github',
+        },
+        {
+          name: 'Get premium templates',
+          value: 'directus-plus',
+        },
+      ],
+      message: 'What type of template would you like to apply?',
+      name: 'templateType',
+      type: 'list',
+    },
+  ])
 
-  const template: any = await inquirer.prompt([{
-    name: 'template',
-    message: 'Select a template.',
-    type: 'list',
-    choices: templateChoices,
-  }])
+  let template: any
+
+  if (templateType.templateType === 'community') {
+    // Get community templates
+    let templates: any[] = []
+
+    // Resolve the path for downloading
+    const downloadDir = resolvePathAndCheckExistence(path.join(__dirname, '..', 'downloads', 'official'), false)
+    if (!downloadDir) {
+      throw new Error(`Invalid download directory: ${path.join(__dirname, '..', 'downloads', 'official')}`)
+    }
+
+    try {
+      const {dir} = await downloadTemplate('github:directus-labs/directus-templates', {
+        dir: downloadDir,
+        force: true,
+        preferOffline: true,
+      })
+
+      templates = await readAllTemplates(dir)
+    } catch (error) {
+      logError(error, {fatal: true})
+    }
+
+    const communityTemplateChoices = templates.map((template: any) => ({name: template.templateName, value: template}))
+    template = await inquirer.prompt([
+      {
+        choices: communityTemplateChoices,
+        message: 'Select a template.',
+        name: 'template',
+        type: 'list',
+      },
+    ])
+  }
+
+  if (templateType.templateType === 'local') {
+    let localTemplateDir = await ux.prompt(
+      'What is the local template directory?',
+    )
+
+    localTemplateDir = resolvePathAndCheckExistence(localTemplateDir)
+
+    if (localTemplateDir) {
+      template = {template: await readTemplate(localTemplateDir)}
+    } else {
+      ux.error('Directory does not exist.')
+    }
+  }
+
+  if (templateType.templateType === 'github') {
+    const ghTemplateUrl = await ux.prompt('What is the public GitHub repository URL?')
+
+    try {
+      const ghString = await transformGitHubUrl(ghTemplateUrl)
+
+      // Resolve the path for downloading
+      const downloadDir = resolvePathAndCheckExistence(path.join(__dirname, '..', 'downloads', 'github'), false)
+      if (!downloadDir) {
+        throw new Error(`Invalid download directory: ${path.join(__dirname, '..', 'downloads', 'github')}`)
+      }
+
+      // Download the template
+      const {dir} = await downloadTemplate(ghString, {
+        dir: downloadDir,
+        force: true,
+        forceClean: true,
+      })
+
+      // Check if the directory exists after download
+      const resolvedDir = resolvePathAndCheckExistence(dir)
+      if (!resolvedDir) {
+        throw new Error(`Downloaded template directory does not exist: ${dir}`)
+      }
+
+      template = {template: await readTemplate(dir)}
+    } catch (error) {
+      logError(error, {fatal: true})
+    }
+  }
+
+  if (templateType.templateType === 'directus-plus') {
+    openUrl('https://directus.io/plus?utm_source=directus-template-cli&utm_content=apply-command')
+    ux.log('Redirecting to Directus website.')
+    ux.exit(0)
+  }
 
   return template
-}
-
-async function executeTestPrompt() {
-    return await ux.prompt('This is test prompt.');
-}
-
-async function getDirectusUrl() {
-  const directusUrl = await ux.prompt('What is your Directus URL?')
-  // Validate URL
-  if (!validateUrl(directusUrl)) {
-    ux.warn('Invalid URL')
-    return getDirectusUrl()
-  }
-
-  return directusUrl
-}
-
-async function getDirectusToken(directusUrl: string) {
-  const directusToken = await ux.prompt('What is your Directus Admin Token?')
-  // Validate token
-  try {
-    await api.get('/users/me', {
-      headers: {
-        Authorization: `Bearer ${directusToken}`,
-      },
-    })
-    return directusToken
-  } catch {
-    ux.warn('Invalid token')
-    return getDirectusToken(directusUrl)
-  }
 }
 
 export default class ApplyCommand extends Command {
   static description = 'Apply a template to a blank Directus instance.'
 
-  static examples = [
-    '$ directus-template-cli apply',
-  ]
+  static examples = ['$ directus-template-cli apply']
 
   static flags = {}
 
   public async run(): Promise<void> {
-    const {flags} = await this.parse(ApplyCommand)
-
     const chosenTemplate = await getTemplate()
-    this.log(`You selected ${chosenTemplate.template.templateName}`)
-    this.log(separator)
+    ux.log(`You selected ${chosenTemplate.template.templateName}`)
+
+    ux.log(separator)
 
     const test = await executeTestPrompt();
 
     const directusUrl = await getDirectusUrl()
-    api.setBaseUrl(directusUrl)
+    await getDirectusToken(directusUrl)
 
-    const directusToken = await getDirectusToken(directusUrl)
-    api.setAuthToken(directusToken)
-
-    this.log(separator)
-
-    // Check if Directus instance is empty, if not, throw error
-    const {data}: {data: any} = await api.get('/collections')
-    // Look for collections that don't start with directus_
-    const collections = data.data.filter((collection: any) => {
-      return !collection.collection.startsWith('directus_')
-    })
-
-    if (collections.length > 0) {
-      ux.error('Directus instance is not empty. Please use a blank instance. Copying a template into an existing instance is not supported at this time.')
-    }
+    ux.log(separator)
 
     // Run load script
-    ux.action.start(`Applying template - ${chosenTemplate.template.templateName}`)
-    await apply(chosenTemplate.template.directoryPath, this)
+    ux.log(
+      `Applying template - ${chosenTemplate.template.templateName} to ${directusUrl}`,
+    )
+
+    await apply(chosenTemplate.template.directoryPath)
+
     ux.action.stop()
 
-    this.log(separator)
-    this.log('Template applied successfully.')
-    this.exit
+    ux.log(separator)
+
+    ux.log('Template applied successfully.')
+
+    ux.exit(0)
   }
 }

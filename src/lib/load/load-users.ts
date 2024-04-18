@@ -1,29 +1,39 @@
-import {api} from '../api'
-import generator from 'generate-password'
+import {createUser} from '@directus/sdk'
+import {ux} from '@oclif/core'
 
-export default async (users: any[]) => {
-  const cleanedUpUsers = users.map(user => {
-    // TODO: Find user role by id in the saved roles.json file. If it's the Directus boostrapped admin role, replace it with the Administrator role id from the new Directus instance.
-    delete user.role
-    //
+import {api} from '../sdk'
+import getRoleIds from '../utils/get-role-ids'
+import logError from '../utils/log-error'
+import readFile from '../utils/read-file'
+
+export default async function loadUsers(
+  dir: string,
+) {
+  const users = readFile('users', dir)
+  ux.action.start(`Loading ${users.length} users`)
+
+  const {legacyAdminRoleId, newAdminRoleId} = await getRoleIds(dir)
+
+  const filteredUsers = users.map(user => {
+    // If the user is an admin, we need to change their role to the new admin role
+    const isAdmin = user.role === legacyAdminRoleId
+    user.role = isAdmin ? newAdminRoleId : user.role
+
+    // Delete the unneeded fields
     delete user.last_page
     delete user.token
-    // user.password = getNewPassword()
+
     return user
   })
-  for (const user of cleanedUpUsers) {
+
+  for (const user of filteredUsers) {
     try {
-      await api.post('users', user)
-      // console.log('Uploaded User' + user.email)
+      await api.client.request(createUser(user))
     } catch (error) {
-      console.log('Error uploading user.', error.response.data.errors)
+      logError(error)
     }
   }
-}
 
-const getNewPassword = () => {
-  return generator.generate({
-    length: 12,
-    numbers: true,
-  })
+  ux.action.stop()
+  ux.log('Loaded users')
 }

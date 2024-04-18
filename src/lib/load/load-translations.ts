@@ -1,11 +1,20 @@
-import {api} from '../api'
+import {createTranslations} from '@directus/sdk'
+import {ux} from '@oclif/core'
 
-export default async (translations: any[]) => {
-  for (const translation of translations) {
-    try {
-      await api.post('translations', translation)
-    } catch (error) {
-      console.log('Error uploading translation', error.response.data.errors)
-    }
+import {api} from '../sdk'
+import logError from '../utils/log-error'
+import readFile from '../utils/read-file'
+
+export default async function loadTranslations(dir: string) {
+  ux.action.start('Loading translations')
+  const translations = readFile('translations', dir)
+
+  try {
+    await api.client.request(createTranslations(translations))
+  } catch (error) {
+    logError(error)
   }
+
+  ux.action.stop()
+  ux.log('Loaded translations')
 }
