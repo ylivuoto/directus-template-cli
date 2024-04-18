@@ -1,5 +1,4 @@
 import {ux} from '@oclif/core'
-
 import checkTemplate from '../utils/check-template'
 import loadCollections from './load-collections'
 import loadDashboards from './load-dashboards'
